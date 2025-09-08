@@ -29,16 +29,18 @@ router.put("/:id", async(req, res) => {
 });
 
 
-router.delete("/:id", async(req, res) => {
-    const { id } = req.params;
-    const post = await postsService.delete(id);
 
-    if (post === null) {
-        res.status(404).json({ message: "Post not found" });
+
+router.delete("/:id", async (req, res) => {
+    const { id } = req.params;
+    const deleted = await postsService.delete(id);
+
+    if (deleted === 0) {
+        return res.status(404).json({ message: "Post not found" });
     }
 
-    res.status(200).json(post);
-})
+    res.status(200).json({ message: "Post deleted successfully" });
+});
 
 router.get("/:id", async (req, res) => {
     const { id } = req.params;

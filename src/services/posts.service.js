@@ -38,21 +38,11 @@ class PostsService {
     return null;
 }
 
-    async delete(id) {
-    const existingPost = await this.#repository.getById(id);
 
-    if (!existingPost) {
-        return null; 
-    }
-
-    const deletedPost = await this.#repository.delete(existingPost);
-
-    if (deletedPost) {
-        return existingPost.getValues();
-    }
-
-    return null;
+async delete(id) {
+    return await this.#repository.delete(id);
 }
+
 
      async getById(id) {
         const post = await this.#repository.getById(id);
