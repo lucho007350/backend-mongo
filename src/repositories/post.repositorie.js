@@ -1,114 +1,58 @@
-const connection = require("../libs/mysql");
-const Post = require("../models/posts");
-const { models } = require("./../libs/sequelize.js");
+// src/repositories/post.repository.js
+const connectMongo = require("../libs/mongo");
+const { Post: PostModel } = require("../database/models/posts.mongo"); 
+const PostClass = require("../models/posts");
 
 class PostRepository {
-    
-    #posts = [];
-    #connection = null;
+  #connection = null;
 
-    constructor() {
-        this.#posts = [];
-        this.getConnection();
+  constructor() {
+    this.getConnection();
+  }
+
+  async getConnection() {
+    if (!this.#connection) {
+      this.#connection = await connectMongo();
     }
+    return this.#connection;
+  }
 
-    async getConnection() {
-        this.#connection = await connection();
-    }
+  async get() {
+    const posts = await PostModel.find();
+    return posts.map(
+      (pst) => new PostClass(pst._id.toString(), pst.title, pst.content)
+    );
+  }
 
-    async get() {
-        const posts = await models.Post.findAll();
-        return posts.map((post) => new Post(post.id, post.title, post.content));
-    }
-    
-    async create(post){
+  async create(post) {
+    const newPost = await PostModel.create({
+      title: post.getTitle(),
+      content: post.getContent(),
+    });
+    post.setId(newPost._id.toString());
+    return post;
+  }
 
-        const newPost = await models.Post.create({
-            title: post.getTitle(),
-            content: post.getContent()
-        });
-        
-        post.setID(newPost.id);
-        return post;
-        // const query = "INSERT INTO posts (title, content) VALUES (?, ?)";
-        // const values = [post.getTitle(), post.getContent()];
+  async getById(id) {
+    const pst = await PostModel.findById(id);
+    if (!pst) return null;
+    return new PostClass(pst._id.toString(), pst.title, pst.content);
+  }
 
-        // const [result] = await this.#connection.execute(query, values);
+  async update(post) {
+    const updated = await PostModel.findByIdAndUpdate(
+      post.getId(),
+      { title: post.getTitle(), content: post.getContent() },
+      { new: true }
+    );
+    if (!updated) return null;
+    return new PostClass(updated._id.toString(), updated.title, updated.content);
+  }
 
-        // post.setID(result.insertId);
-
-        // return post;
-    }
-
-    async update(post) {
-
-        await models.Post.update({
-            title: post.getTitle(),
-            content: post.getContent()
-        }, {
-            where: {
-                id: post.getID(),
-            }
-        });
-
-        return post;
-    
-    // const query = "UPDATE posts SET title = ?, content = ? WHERE id = ?";
-    // const values = [post.getTitle(), post.getContent(), post.getID()];
-
-    // const [result] = await this.#connection.execute(query, values);
-
-    // if (result.affectedRows > 0) {
-    //     return post;
-    // }
-
-    // return null;
-}
-
-    async delete(id) {
-        await models.Post.destroy({
-            where: {
-                id: id,
-            }
-        })
-    
-
-        
-
-
-    // const query = "DELETE FROM posts WHERE id = ?";
-    // const values = [post.getID()];
-
-    // const [result] = await this.#connection.execute(query, values);
-
-    // if (result.affectedRows > 0) {
-    //     return post;
-    // }
-
-    // return null;
-}
-
-
-    async getById(id) {
-
-        const post = await models.Post.findByPk(id);
-
-        return new Post(post.id, post.title, post.content);
-        
-        
-    }
-
-// const query = "SELECT * FROM posts WHERE id = ?";
-        // const [rows] = await this.#connection.execute(query, [id]);
-
-        // if (rows.length === 0) {
-        //     return null;
-        // }
-
-        // const row = rows[0];
-        // return new Post (row.id, row.title, row.content);
-
-    
+  async delete(post) {
+    await PostModel.findByIdAndDelete(post.getId());
+    return true;
+  }
 }
 
 module.exports = PostRepository;
