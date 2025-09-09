@@ -6,7 +6,7 @@ const getMongoConnection = async () => {
   if (!connection) {
     try {
       const uri =
-        "mongodb+srv://andres2006:doritos062006@proyecto-condominios.wrkby1u.mongodb.net/proyectocondominios?retryWrites=true&w=majority&appName=Proyecto-Condominios";
+        "mongodb+srv://luisfelipegrisalesramirez_db_user:ECf8bU7EMsyDxHO0@test-luisfelipe.h63myin.mongodb.net/?retryWrites=true&w=majority&appName=test-luisfelipe";
 
       connection = await mongoose.connect(uri);
 

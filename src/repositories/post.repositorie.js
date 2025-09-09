@@ -29,7 +29,7 @@ class PostRepository {
       title: post.getTitle(),
       content: post.getContent(),
     });
-    post.setId(newPost._id.toString());
+    post.setID(newPost._id.toString());
     return post;
   }
 
@@ -41,7 +41,7 @@ class PostRepository {
 
   async update(post) {
     const updated = await PostModel.findByIdAndUpdate(
-      post.getId(),
+      post.getID(),
       { title: post.getTitle(), content: post.getContent() },
       { new: true }
     );
@@ -50,7 +50,7 @@ class PostRepository {
   }
 
   async delete(post) {
-    await PostModel.findByIdAndDelete(post.getId());
+    await PostModel.findByIdAndDelete(post.getID());
     return true;
   }
 }
